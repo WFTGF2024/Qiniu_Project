@@ -16,8 +16,8 @@
 
 考虑到可用性和并发性，我决定采用前后端分离架构。
 **前端**:Vue3+TS+ElementPlus。
-**后端**:Go
-**大模型API**:Flask 部署规范的OpenAI API端口
+**后端（基本功能）**:Go+Gin+Gorm+MySQL+Redis+Docker。
+**后端（本地大模型）**:Python Flask 或vllm
 
 ## 问题和回答
 <font color="red">1. 你计划将这个网页面向什么类型的用户？这些类型的用户他们面临什么样的痛点，你设想的用户故事是什么样呢？</font>
