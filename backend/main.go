@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"qiniu_project/backend/config"
 	"qiniu_project/backend/database"
 	"qiniu_project/backend/handlers"
 	"qiniu_project/backend/middleware"
@@ -15,40 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 )
-
-type Config struct {
-	MySQL struct {
-		Host     string `yaml:"host"`
-		Port     int    `yaml:"port"`
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		Database string `yaml:"database"`
-	} `yaml:"mysql"`
-
-	AppLogFile string `yaml:"app_log_file"`
-	ServerPort int    `yaml:"server_port"`
-}
-
-func loadConfig(filePath string) (*Config, error) {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil, err
-	}
-
-	configData, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var config Config
-	err = yaml.Unmarshal(configData, &config)
-	if err != nil {
-		return nil, err
-	}
-
-	return &config, nil
-}
 
 func setupRouter() *gin.Engine {
 	// 设置Gin模式
@@ -112,9 +80,13 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	log.Info("应用程序启动...")
+
 	// 解析命令行参数
 	configPath := flag.String("r", "", "配置文件绝对路径 (必填)")
 	flag.Parse()
+
+	log.WithField("configPath", *configPath).Info("解析命令行参数")
 
 	// 参数校验
 	if *configPath == "" {
@@ -122,53 +94,72 @@ func main() {
 	}
 
 	// 初始化logrus
+	log.Info("初始化日志系统...")
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
 
 	// 启动HTTP服务器以支持pprof性能分析
 	go func() {
+		log.Info("启动pprof性能分析服务器，监听地址: 127.0.0.1:6060")
 		if err := http.ListenAndServe("127.0.0.1:6060", nil); err != nil {
-			log.Fatalf("启动pprof HTTP服务器失败: %v", err)
+			log.WithError(err).Fatal("启动pprof HTTP服务器失败")
 		}
 	}()
 
 	// 1. 加载配置文件
-	config, err := loadConfig(*configPath)
+	log.Info("开始加载配置文件...")
+	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
-		log.Fatalf("加载配置文件失败: %v", err)
+		log.WithError(err).Fatal("加载配置文件失败")
 	}
+
+	log.WithFields(log.Fields{
+		"mysql_host":     cfg.MySQL.Host,
+		"mysql_port":     cfg.MySQL.Port,
+		"mysql_user":     cfg.MySQL.User,
+		"mysql_database": cfg.MySQL.Database,
+		"app_log_file":   cfg.AppLogFile,
+		"server_port":    cfg.ServerPort,
+	}).Info("配置文件加载成功")
 
 	// 设置运行时日志输出到指定的日志文件
-	if err := os.MkdirAll(filepath.Dir(config.AppLogFile), 0755); err != nil {
-		log.Fatalf("创建日志目录失败: %v", err)
+	log.Info("设置日志输出到文件...")
+	if err := os.MkdirAll(filepath.Dir(cfg.AppLogFile), 0755); err != nil {
+		log.WithError(err).Fatal("创建日志目录失败")
 	}
 
-	f, err := os.OpenFile(config.AppLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	f, err := os.OpenFile(cfg.AppLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		log.Fatalf("打开日志文件失败: %v", err)
+		log.WithError(err).Fatal("打开日志文件失败")
 	}
 	defer f.Close()
 
 	log.SetOutput(f)
+	log.Info("日志系统配置完成")
 
 	// 2. 初始化数据库连接
+	log.Info("初始化数据库连接...")
 	database.InitDB()
 
 	// 3. 设置路由
+	log.Info("设置HTTP路由...")
 	router := setupRouter()
 
 	// 设置服务器端口，如果配置中没有设置则使用默认值8080
-	serverPort := config.ServerPort
+	serverPort := cfg.ServerPort
 	if serverPort == 0 {
 		serverPort = 8080
+		log.Info("使用默认服务器端口: 8080")
+	} else {
+		log.WithField("serverPort", serverPort).Info("使用配置的服务器端口")
 	}
 
 	// 启动HTTP服务器
 	serverAddr := fmt.Sprintf(":%d", serverPort)
-	log.Infof("服务器启动，监听地址: %s", serverAddr)
+	log.WithField("serverAddr", serverAddr).Info("启动HTTP服务器")
 
 	if err := router.Run(serverAddr); err != nil {
-		log.Fatalf("启动服务器失败: %v", err)
+		log.WithError(err).Fatal("启动服务器失败")
 	}
 }

@@ -2,14 +2,16 @@
 
 ## 项目概述
 
-本项目是一个基于Go语言的后端服务，实现了用户CRUD、会员管理和聊天记录等功能。本项目使用Gin框架作为HTTP服务器，GORM作为ORM框架，MySQL作为数据库。
+本项目是一个基于Go语言的后端服务，实现了用户CRUD、会员管理和聊天记录等功能。本项目使用Gin框架作为HTTP服务器，GORM作为ORM框架，MySQL作为数据库。项目采用模块化设计，配置统一管理，日志系统使用logrus。
 
 ## 项目结构
 
 ```
 backend/
-├── database/          # 数据库连接和初始化
-│   └── database.go   # 数据库连接和模型迁移
+├── config/           # 配置文件
+│   └── config.go     # 配置加载和管理，使用全局变量存储配置
+├── database/         # 数据库连接和初始化
+│   └── database.go   # 数据库连接和模型迁移，使用logrus记录日志
 ├── handlers/         # 请求处理函数
 │   └── user_handler.go # 用户相关处理函数
 ├── middleware/       # 中间件
@@ -18,7 +20,7 @@ backend/
 │   └── user.go       # 用户模型
 ├── utils/            # 工具函数
 │   └── utils.go      # 密码哈希、JWT等工具函数
-└── main.go           # 主程序入口
+└── main.go           # 主程序入口，负责初始化配置、日志系统和数据库连接
 ```
 
 ## 用户CRUD接口实现
@@ -37,12 +39,19 @@ backend/
 - `SecurityVerifyRequest`结构体：用于处理密保问题验证请求。
 - `ResetPasswordRequest`结构体：用于处理密码重置请求。
 
-### 2. 数据库连接 (database/database.go)
+### 2. 配置管理 (config/config.go)
+
+`config.go`文件负责统一管理应用程序配置：
+
+- `Config`结构体：定义了应用程序所需的配置项，包括MySQL连接信息和服务器设置。
+- `GlobalConfig`全局变量：存储已加载的配置，供整个应用程序使用。
+- `LoadConfig()`函数：从指定路径加载YAML配置文件，并将配置存储到全局变量中。
+
+### 3. 数据库连接 (database/database.go)
 
 `database.go`文件负责数据库连接和初始化：
 
 - `InitDB()`函数：初始化数据库连接，连接MySQL数据库并自动迁移模型到数据库表。
-- `loadConfig()`函数：从配置文件中加载MySQL连接信息。
 - `autoMigrate()`函数：使用GORM的AutoMigrate功能自动创建或更新数据库表。
 
 ### 3. 工具函数 (utils/utils.go)
@@ -77,13 +86,20 @@ backend/
 
 `main.go`文件是程序的入口点，负责：
 
-- 初始化日志系统
-- 加载配置文件
+- 解析命令行参数，获取配置文件路径
+- 初始化logrus日志系统，配置日志输出到文件
+- 使用config包加载配置文件
 - 初始化数据库连接
 - 设置HTTP路由
 - 启动HTTP服务器
 
 `setupRouter()`函数：配置Gin路由，包括设置中间件、CORS支持、API路由分组等。
+
+配置加载流程：
+1. 通过命令行参数 `-r` 指定配置文件路径
+2. 调用 `config.LoadConfig()` 加载配置
+3. 配置信息存储在 `config.GlobalConfig` 中供全局使用
+4. 数据库连接和其他组件使用全局配置变量
 
 ## 接口文档
 
@@ -103,6 +119,23 @@ backend/
 
 1. 确保已安装Go 1.17.13版本
 2. 确保MySQL数据库已启动并创建了Qiniu_Project数据库
-3. 根据实际情况修改config.yaml中的数据库连接信息
+3. 根据实际情况修改config.yaml中的数据库连接信息和服务器设置
 4. 运行`go mod tidy`安装依赖
-5. 运行`go run main.go`启动服务器
+5. 运行`go run main.go -r /path/to/config.yaml`启动服务器，其中`/path/to/config.yaml`是配置文件的完整路径
+
+配置文件格式示例：
+```yaml
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  password: yourpassword
+  database: Qiniu_Project
+app_log_file: logs/app.log
+server_port: 8080
+```
+
+日志系统配置：
+- 日志输出到文件，路径由配置文件中的`app_log_file`指定
+- 日志格式为JSON格式，便于日志分析工具处理
+- 日志级别为Info，记录关键操作和错误信息
