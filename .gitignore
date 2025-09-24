@@ -1,0 +1,8 @@
+.vscode/
+**/.vscode/
+logs/
+**/logs/
+.DS_Store/
+go.sum
+config.yaml
+**/config.yaml/
