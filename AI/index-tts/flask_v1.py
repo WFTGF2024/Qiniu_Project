@@ -30,7 +30,7 @@ def synthesize():
     prompt_audio_path = None
     temp_files = []
 
-    # ´¦Àí multipart/form-data
+    # ï¿½ï¿½ï¿½ï¿½ multipart/form-data
     if request.content_type and "multipart/form-data" in request.content_type:
         text = request.form.get("text")
         if not text:
@@ -43,7 +43,7 @@ def synthesize():
             prompt_audio_path = tmp.name
             temp_files.append(tmp.name)
 
-        # ÆäËü¿ÉÑ¡²ÎÊý
+        # ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½
         emo_control = int(request.form.get("emo_control_method", 0))
         emo_audio = None
         emo_weight = float(request.form.get("emo_weight", 0.65))
@@ -64,7 +64,7 @@ def synthesize():
         max_text_tokens_per_segment = 120
 
     else:
-        # ´¦Àí application/json
+        # ï¿½ï¿½ï¿½ï¿½ application/json
         data = request.get_json(force=True)
         if not data or "text" not in data:
             return jsonify({"error": "Missing required parameter: text"}), 400
@@ -116,7 +116,7 @@ def synthesize():
         **kwargs,
     )
 
-    # ÇåÀíÁÙÊ±ÎÄ¼þ
+    # ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä¼ï¿½
     for f in temp_files:
         try:
             os.remove(f)

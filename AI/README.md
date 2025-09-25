@@ -1,6 +1,6 @@
 这里存AI大模型本地部署代码，全部由朱佳鸿开发
 # <font color="red">语音识别模块</font>
-## Whisper_v1
+## Whisper_v1(暂时不可用，cnn版本冲突错误)
 ### 整段识别
 ```cmd
 curl -X POST http://120.79.25.184:7205/transcribe ^
