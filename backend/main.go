@@ -31,16 +31,16 @@ func setupRouter() *gin.Engine {
 
 	// 设置CORS中间件
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Header("Access-Control-Allow-Origin", "*")                                                                                   // 允许所有来源
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")                                                    // 允许的请求方法
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization") // 允许的请求头
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+		if c.Request.Method == "OPTIONS" { // 处理预检请求
+			c.AbortWithStatus(204) // 预检请求直接返回204
 			return
 		}
 
-		c.Next()
+		c.Next() // 继续处理请求
 	})
 
 	// 创建API路由组
@@ -56,17 +56,17 @@ func setupRouter() *gin.Engine {
 		auth.POST("/login", handlers.Login)
 
 		// 验证密保问题
-		auth.POST("/verify-security", handlers.VerifySecurity)
+		auth.POST("/verify_security", handlers.VerifySecurity)
 
 		// 重置密码
-		auth.POST("/reset-password", handlers.ResetPassword)
+		auth.POST("/reset_password", handlers.ResetPassword)
 
 		// 获取用户信息（需要认证）
 		auth.GET("/me", middleware.JWTAuthMiddleware(), handlers.GetProfile)
 	}
 
 	// 用户管理路由（需要认证）
-	users := api.Group("/users")
+	users := api.Group("/user")
 	users.Use(middleware.JWTAuthMiddleware())
 	{
 		// 更新用户信息
@@ -74,6 +74,38 @@ func setupRouter() *gin.Engine {
 
 		// 删除用户
 		users.DELETE("/:user_id", handlers.DeleteUser)
+	}
+
+	// 会员管理路由（需要认证）
+	memberships := api.Group("/membership")
+	memberships.Use(middleware.JWTAuthMiddleware())
+	{
+		// 获取会员信息
+		memberships.GET("/:user_id", handlers.GetMembershipInfo)
+
+		// 新增会员信息
+		memberships.POST("/:user_id", handlers.CreateMembershipInfo)
+
+		// 查询所有会员信息
+		memberships.GET("", handlers.GetAllMemberships)
+
+		// 更新会员信息
+		memberships.PUT("/:membership_id", handlers.UpdateMembership)
+
+		// 删除会员信息
+		memberships.DELETE("/:membership_id", handlers.DeleteMembership)
+
+		// 新增订单
+		memberships.POST("/orders", handlers.CreateOrder)
+
+		// 查询会员订单
+		memberships.GET("/orders/:user_id", handlers.GetMembershipOrders)
+
+		// 查询最近一条订单
+		memberships.GET("/orders/:user_id/latest", handlers.GetLatestOrder)
+
+		// 查询最近N条订单
+		memberships.GET("/orders/:user_id/recent", handlers.GetRecentOrders)
 	}
 
 	return r
