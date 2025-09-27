@@ -69,10 +69,12 @@ func InitDB() {
 func autoMigrate(db *gorm.DB) error {
 	log.Info("开始数据库表迁移...")
 
-	// 迁移User表
-	log.Info("正在迁移User表...")
+	// 迁移表
+	log.Info("正在迁移表...")
 	err := db.AutoMigrate(
 		&models.User{},
+		&models.MembershipInfo{},
+		&models.MembershipOrder{},
 	)
 	if err != nil {
 		log.WithError(err).Error("数据库表迁移失败")
