@@ -3,8 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-	"qiniu_project/backend/models"
-	"qiniu_project/backend/services"
+
+	"github.com/WFTGF2024/Qiniu_Project/backend/models"
+	"github.com/WFTGF2024/Qiniu_Project/backend/services"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -84,9 +85,9 @@ func CreateMembership(c *gin.Context) {
 
 	log.WithField("membershipID", membership.MembershipID).Info("创建会员信息成功")
 	c.JSON(http.StatusOK, gin.H{
-		"success":      true,
+		"success":       true,
 		"membership_id": membership.MembershipID,
-		"message":      "会员信息已创建",
+		"message":       "会员信息已创建",
 	})
 }
 
@@ -214,9 +215,9 @@ func CreateOrder(c *gin.Context) {
 
 	log.WithField("orderID", order.OrderID).Info("创建订单成功")
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
+		"success":  true,
 		"order_id": order.OrderID,
-		"message": "订单已创建",
+		"message":  "订单已创建",
 	})
 }
 

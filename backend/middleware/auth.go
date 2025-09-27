@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"qiniu_project/backend/utils"
+	"github.com/WFTGF2024/Qiniu_Project/backend/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -46,8 +46,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		log.WithFields(log.Fields{
-			"userID":    userID,
-			"token":     tokenString,
+			"userID":   userID,
+			"token":    tokenString,
 			"method":   c.Request.Method,
 			"path":     c.Request.URL.Path,
 			"clientIP": c.ClientIP(),

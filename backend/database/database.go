@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"qiniu_project/backend/config"
-	"qiniu_project/backend/models"
+	"github.com/WFTGF2024/Qiniu_Project/backend/config"
+	"github.com/WFTGF2024/Qiniu_Project/backend/models"
 
 	log "github.com/sirupsen/logrus"
 )
