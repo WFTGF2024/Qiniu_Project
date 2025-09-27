@@ -1,0 +1,1 @@
+这个文件夹是Qwen3-Embedding-4B模型参数保存位置
