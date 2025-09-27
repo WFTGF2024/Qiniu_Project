@@ -152,6 +152,13 @@ backend/
 3. 配置信息存储在 `config.GlobalConfig` 中供全局使用
 4. 数据库连接和其他组件使用全局配置变量
 
+#### 会员系统初始化流程
+
+1. **会员类型初始化**：系统启动时自动检查并初始化默认会员类型
+2. **定时任务启动**：调用 `services.InitMemberTasks()` 启动会员过期检查和通知任务
+3. **支付配置加载**：从配置文件加载支付平台相关配置，如支付API密钥等
+4. **会员中间件注册**：将会员中间件注册到需要会员权限的路由组
+
 #### 架构初始化流程
 
 1. **配置初始化**：`main.go`首先加载配置文件，并将配置存储在全局变量中
@@ -170,9 +177,86 @@ backend/
 - **Database层**使用Config层的配置信息建立数据库连接
 - **Middleware层**作为横切关注点，应用到特定的路由组上
 
+## 会员相关接口实现
+
+本部分详细说明会员相关接口的实现逻辑，包括各个文件的功能和函数作用。
+
+### 1. 数据模型层 (models/member.go)
+
+`member.go`文件定义了会员相关的数据结构，包括：
+
+- `Member`结构体：对应数据库中的members表，包含会员ID、用户ID、会员类型、开始时间、结束时间、状态等字段。
+- `MemberType`结构体：定义会员类型信息，包括类型ID、类型名称、价格、特权描述等。
+- `CreateMemberRequest`结构体：用于处理会员创建请求，包含会员类型和支付信息等字段。
+- `MemberResponse`结构体：用于返回会员信息，包含会员详情和剩余时间等。
+- `MemberTypeResponse`结构体：用于返回会员类型信息。
+
+### 2. 业务逻辑层 (services/member_service.go)
+
+`member_service.go`文件实现了会员相关的业务逻辑，采用接口设计模式：
+
+- `MemberService`接口：定义了会员相关的业务方法，包括创建会员、获取会员信息、更新会员状态、获取会员类型列表、检查会员有效性等。
+- `memberService`结构体：实现了MemberService接口，包含了具体的业务逻辑实现。
+- `NewMemberService()`函数：创建MemberService实例，采用工厂模式。
+
+#### 主要业务方法：
+
+- `CreateMember()`：处理会员创建业务逻辑，包括验证用户、处理支付、创建会员记录等。
+- `GetMemberInfo()`：获取会员信息，包括会员详情和剩余时间。
+- `UpdateMemberStatus()`：更新会员状态，如取消会员资格。
+- `GetMemberTypes()`：获取所有可用的会员类型列表。
+- `CheckMemberValidity()`：检查用户是否为有效会员。
+- `CalculateRemainingDays()`：计算会员剩余天数。
+
+### 3. HTTP处理层 (handlers/member_handler.go)
+
+`member_handler.go`文件实现了所有会员相关的HTTP处理函数，主要负责：
+
+- 请求参数解析和验证
+- 调用Service层处理业务逻辑
+- 格式化响应数据
+- 错误处理和日志记录
+
+#### 主要处理函数：
+
+- `CreateMember()`：处理会员创建HTTP请求，调用`memberService.CreateMember()`方法。
+- `GetMemberInfo()`：获取会员信息HTTP请求，调用`memberService.GetMemberInfo()`方法。
+- `UpdateMemberStatus()`：更新会员状态HTTP请求，调用`memberService.UpdateMemberStatus()`方法。
+- `GetMemberTypes()`：获取会员类型列表HTTP请求，调用`memberService.GetMemberTypes()`方法。
+- `CheckMemberValidity()`：检查会员有效性HTTP请求，调用`memberService.CheckMemberValidity()`方法。
+
+### 4. 支付集成 (services/payment_service.go)
+
+`payment_service.go`文件实现了支付相关的业务逻辑：
+
+- `PaymentService`接口：定义了支付相关的业务方法，包括创建支付订单、查询支付状态、处理支付回调等。
+- `paymentService`结构体：实现了PaymentService接口，包含了具体的支付逻辑实现。
+- `NewPaymentService()`函数：创建PaymentService实例。
+
+#### 主要业务方法：
+
+- `CreatePaymentOrder()`：创建支付订单，生成支付链接或二维码。
+- `QueryPaymentStatus()`：查询支付状态，确认支付是否成功。
+- `HandlePaymentCallback()`：处理支付平台的回调通知，更新订单状态。
+- `RefundPayment()`：处理退款请求。
+
+### 5. 定时任务 (services/member_task.go)
+
+`member_task.go`文件实现了会员相关的定时任务：
+
+- `CheckExpiredMembers()`：检查过期会员，自动更新会员状态。
+- `SendExpirationNotification()`：发送会员即将过期通知。
+- `InitMemberTasks()`：初始化会员相关的定时任务。
+
+### 6. 中间件 (middleware/member.go)
+
+`member.go`文件实现了会员相关的中间件：
+
+- `MemberMiddleware()`：验证用户是否为有效会员，如果不是则返回错误。
+
 ## 接口文档
 
-本项目的用户CRUD接口实现了API.md中"1.用户CRUD"部分的所有功能，采用分层架构设计，实现了业务逻辑与HTTP处理逻辑的分离：
+本项目的用户CRUD接口实现了API.md中"1.用户CRUD"部分的所有功能，会员相关接口实现了API.md中"2.会员管理"部分的所有功能，均采用分层架构设计，实现了业务逻辑与HTTP处理逻辑的分离：
 
 ### 认证接口
 
@@ -213,6 +297,43 @@ backend/
    - Service层：`services.UserService.DeleteUser()`
    - 功能：删除用户记录，需要JWT认证
 
+### 会员管理接口
+
+8. **创建会员** (POST /api/members)
+   - Handler层：`handlers.CreateMember()`
+   - Service层：`services.MemberService.CreateMember()`
+   - 支付层：`services.PaymentService.CreatePaymentOrder()`
+   - 功能：创建会员订单，处理支付，创建会员记录，需要JWT认证
+
+9. **获取会员信息** (GET /api/members)
+   - Handler层：`handlers.GetMemberInfo()`
+   - Service层：`services.MemberService.GetMemberInfo()`
+   - 功能：获取当前用户的会员信息，包括会员详情和剩余时间，需要JWT认证
+
+10. **更新会员状态** (PUT /api/members/:member_id/status)
+    - Handler层：`handlers.UpdateMemberStatus()`
+    - Service层：`services.MemberService.UpdateMemberStatus()`
+    - 功能：更新会员状态（如取消会员资格），需要JWT认证和管理员权限
+
+11. **获取会员类型列表** (GET /api/members/types)
+    - Handler层：`handlers.GetMemberTypes()`
+    - Service层：`services.MemberService.GetMemberTypes()`
+    - 功能：获取所有可用的会员类型列表，无需认证
+
+12. **检查会员有效性** (GET /api/members/validity)
+    - Handler层：`handlers.CheckMemberValidity()`
+    - Service层：`services.MemberService.CheckMemberValidity()`
+    - 功能：检查当前用户是否为有效会员，需要JWT认证
+
+13. **支付回调处理** (POST /api/members/payment/callback)
+    - Handler层：`handlers.PaymentCallback()`
+    - 支付层：`services.PaymentService.HandlePaymentCallback()`
+    - 功能：处理支付平台的回调通知，更新订单和会员状态，无需认证（由支付平台调用）
+
+14. **会员中间件** (应用于需要会员权限的API)
+    - 中间件层：`middleware.MemberMiddleware()`
+    - 功能：验证用户是否为有效会员，如果不是则返回错误
+
 详细的接口请求和响应格式请参考API.md文件。
 
 ### 架构优势
@@ -224,6 +345,16 @@ backend/
 3. **易于测试**：可以独立测试业务逻辑，不需要HTTP上下文
 4. **更好的扩展性**：添加新功能时，可以在不同层次进行扩展
 5. **更清晰的错误处理**：错误处理更加集中和一致
+
+### 会员系统架构优势
+
+会员系统实现了以下额外优势：
+
+1. **支付解耦**：通过独立的PaymentService，可以轻松切换不同的支付平台
+2. **自动化管理**：通过定时任务自动处理会员过期状态，减少人工干预
+3. **权限控制**：通过MemberMiddleware实现细粒度的会员权限控制
+4. **扩展性**：会员类型和特权可以灵活扩展，无需修改核心业务逻辑
+5. **状态一致性**：通过支付回调确保订单状态和会员状态的一致性
 
 ## 运行项目
 

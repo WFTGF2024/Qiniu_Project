@@ -76,6 +76,41 @@ func setupRouter() *gin.Engine {
 		users.DELETE("/:user_id", handlers.DeleteUser)
 	}
 
+	// 会员管理路由
+	membership := api.Group("/membership")
+	{
+		// 查询会员信息
+		membership.GET("/:user_id", handlers.GetMembershipInfo)
+
+		// 查询所有会员信息
+		membership.GET("", handlers.GetAllMemberships)
+
+		// 新增会员信息
+		membership.POST("", handlers.CreateMembership)
+
+		// 更新会员信息
+		membership.PUT("/:membership_id", handlers.UpdateMembership)
+
+		// 删除会员信息
+		membership.DELETE("/:membership_id", handlers.DeleteMembership)
+	}
+
+	// 会员订单管理路由
+	orders := api.Group("/membership/orders")
+	{
+		// 查询会员订单记录
+		orders.GET("/:user_id", handlers.GetMembershipOrders)
+
+		// 新增订单
+		orders.POST("", handlers.CreateOrder)
+
+		// 查询最近一条订单
+		orders.GET("/:user_id/latest", handlers.GetLatestOrder)
+
+		// 查询最近N条订单
+		orders.GET("/:user_id/recent", handlers.GetRecentOrders)
+	}
+
 	return r
 }
 
