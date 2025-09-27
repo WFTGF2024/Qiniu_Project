@@ -1,0 +1,9 @@
+mysql:
+  host: 120.79.25.184
+  port: 3306
+  user: Qiniu
+  password: 20250922
+  database: Qiniu_Project
+
+app_log_file: "/Users/user/Desktop/Qiniu_Project/logs/running.log"
+server_port: 8080
