@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: pg_websearch
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: websearch
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant_websearch
+    restart: unless-stopped
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
