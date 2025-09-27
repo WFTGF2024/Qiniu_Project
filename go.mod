@@ -1,4 +1,4 @@
-module qiniu_project
+module github.com/WFTGF2024/Qiniu_Project
 
 go 1.17
 

@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"qiniu_project/backend/config"
-	"qiniu_project/backend/database"
-	"qiniu_project/backend/handlers"
-	"qiniu_project/backend/middleware"
+	"github.com/WFTGF2024/Qiniu_Project/backend/config"
+	"github.com/WFTGF2024/Qiniu_Project/backend/database"
+	"github.com/WFTGF2024/Qiniu_Project/backend/handlers"
+	"github.com/WFTGF2024/Qiniu_Project/backend/middleware"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"

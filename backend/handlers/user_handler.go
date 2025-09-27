@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"net/http"
-	"qiniu_project/backend/models"
-	"qiniu_project/backend/services"
-	"qiniu_project/backend/utils"
 	"time"
+
+	"github.com/WFTGF2024/Qiniu_Project/backend/models"
+	"github.com/WFTGF2024/Qiniu_Project/backend/services"
+	"github.com/WFTGF2024/Qiniu_Project/backend/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

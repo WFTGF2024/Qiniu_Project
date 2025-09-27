@@ -2,9 +2,10 @@ package services
 
 import (
 	"errors"
-	"qiniu_project/backend/database"
-	"qiniu_project/backend/models"
-	"qiniu_project/backend/utils"
+
+	"github.com/WFTGF2024/Qiniu_Project/backend/database"
+	"github.com/WFTGF2024/Qiniu_Project/backend/models"
+	"github.com/WFTGF2024/Qiniu_Project/backend/utils"
 
 	log "github.com/sirupsen/logrus"
 )
