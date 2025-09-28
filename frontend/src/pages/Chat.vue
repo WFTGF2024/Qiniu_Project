@@ -11,12 +11,14 @@
     <LoginGate v-if="!isLogin" />
 
     <div class="chat-list">
+      <!-- ✅ 始终传 text；仅对 assistant 打开 is-html，并把 text 换成已转换的 HTML -->
       <MessageBubble
         v-for="(m,i) in messages"
-        :key="i"
-        :who="m.role==='user'?'user':'ai'"
-        :text="m.content"
-        :avatar="m.role==='user'?'👤':role.avatar || '🤖'"
+        :key="m.ts ?? i"
+        :who="m.role==='user' ? 'user' : 'ai'"
+        :avatar="m.role==='user' ? '👤' : (role.avatar || '🤖')"
+        :text="m.role==='assistant' ? toHtml(m.content) : m.content"
+        :is-html="m.role==='assistant'"
       >
         <template #meta>
           <span>{{ new Date(m.ts).toLocaleTimeString() }}</span>
@@ -50,9 +52,11 @@ import DeepQuestionChips from '../components/DeepQuestionChips.vue'
 import LoginGate from '../components/LoginGate.vue'
 import TTSVoicePicker from '../components/TTSVoicePicker.vue'
 import ChatHeader from '../components/ChatHeader.vue'
+import MarkdownIt from 'markdown-it'
 
 const chat = useChatStore()
 const user = useUserStore()
+
 const text = ref('')
 const tts = ref({ style: chat.settings.ttsStyle, emoWeight: chat.settings.emoWeight })
 const role = computed(()=> chat.currentRole)
@@ -62,6 +66,14 @@ const settings = chat.settings
 const isLogin = computed(()=> user.isLogin)
 const pending = computed(()=> chat.pending)
 const canSave = computed(()=> user.isLogin && chat.messages.length>0)
+
+// ✅ 最小改动：在组件内初始化 markdown-it，并提供 toHtml 转换函数
+const md = new MarkdownIt({
+  html: false,   // 禁止原始 HTML 直出，降低 XSS 风险
+  linkify: true, // 自动把 URL 识别为链接
+  breaks: true,  // 单换行转 <br>
+})
+const toHtml = (text) => md.render(text || '')
 
 watch(tts, (v)=>{
   chat.settings.ttsStyle = v.style
@@ -119,7 +131,7 @@ async function converse(userText) {
       }
       msgs.push({ role: 'user', content: userText })
     } else {
-      // 🚫 免登录用户：只带 system + 当前问题
+      // 免登录用户：只带 system + 当前问题
       msgs = [
         { role: 'system', content: sysWithKB },
         { role: 'user', content: userText }
@@ -147,7 +159,6 @@ async function converse(userText) {
       full = content
     }
 
-    // deep questions
     const qs = parseDeepQuestions(full)
     chat.setDeepQuestions(qs)
 
@@ -157,7 +168,6 @@ async function converse(userText) {
     chat.pending = false
   }
 }
-
 
 async function exportChat(){
   const payload = { role: role.value, messages: chat.messages, ts: Date.now() }
@@ -180,3 +190,7 @@ async function save(){
 
 function toggleVoice(){ chat.settings.voiceEnabled = !chat.settings.voiceEnabled }
 </script>
+
+<style scoped>
+/* 这里无需额外样式，渲染在 MessageBubble 内部 .content 中 */
+</style>
