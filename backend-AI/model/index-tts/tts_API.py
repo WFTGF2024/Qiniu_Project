@@ -23,13 +23,13 @@ tts = IndexTTS2(
 
 app = Flask(__name__)
 
-# ============ Ä¬ÈÏ²Î¿¼ÒôÆµÂ·¾¶ ============
+# ============ Ä¬ï¿½Ï²Î¿ï¿½ï¿½ï¿½ÆµÂ·ï¿½ï¿½ ============
 DEFAULT_REFS = {
     "style1": "./default_refs/style1.wav",
     "style2": "./default_refs/style2.wav",
     "style3": "./default_refs/style3.wav"
 }
-DEFAULT_STYLE = "style1"  # Ä¬ÈÏ·ç¸ñ
+DEFAULT_STYLE = "style1"  # Ä¬ï¿½Ï·ï¿½ï¿½
 
 
 # ============ TTS Endpoint ============
@@ -39,21 +39,21 @@ def synthesize():
     prompt_audio_path = None
     temp_files = []
 
-    # Ö»Ö§³Ö multipart/form-data
+    # Ö»Ö§ï¿½ï¿½ multipart/form-data
     if not request.content_type or "multipart/form-data" not in request.content_type:
         return jsonify({"error": "Only multipart/form-data is supported"}), 400
 
-    # »ñÈ¡ÎÄ±¾
+    # ï¿½ï¿½È¡ï¿½Ä±ï¿½
     text = request.form.get("text")
     if not text:
         return jsonify({"error": "Missing required parameter: text"}), 400
 
-    # »ñÈ¡·ç¸ñ²ÎÊý
+    # ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     style = request.form.get("style", DEFAULT_STYLE)
     if style not in DEFAULT_REFS:
         style = DEFAULT_STYLE
 
-    # Èç¹ûÓÃ»§ÉÏ´«ÁËÒôÆµ£¬ÓÃÓÃ»§µÄ£»·ñÔòÓÃÄ¬ÈÏ·ç¸ñµÄÒôÆµ
+    # ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½Æµ
     if "prompt_audio" in request.files:
         f = request.files["prompt_audio"]
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
@@ -63,7 +63,7 @@ def synthesize():
     else:
         prompt_audio_path = DEFAULT_REFS[style]
 
-    # ÆäËü¿ÉÑ¡²ÎÊý
+    # ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½
     emo_control = int(request.form.get("emo_control_method", 0))
     emo_audio = None
     emo_weight = float(request.form.get("emo_weight", 0.65))
@@ -83,7 +83,7 @@ def synthesize():
     )
     max_text_tokens_per_segment = int(request.form.get("max_text_tokens_per_segment", 120))
 
-    # Êä³öÂ·¾¶
+    # ï¿½ï¿½ï¿½Â·ï¿½ï¿½
     os.makedirs("outputs", exist_ok=True)
     output_path = os.path.join("outputs", f"tts_{int(time.time())}.wav")
 
@@ -103,7 +103,7 @@ def synthesize():
         **kwargs,
     )
 
-    # ÇåÀíÁÙÊ±ÎÄ¼þ
+    # ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä¼ï¿½
     for f in temp_files:
         try:
             os.remove(f)

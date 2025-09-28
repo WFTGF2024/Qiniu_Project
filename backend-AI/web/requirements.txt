@@ -1,7 +1,0 @@
-flask
-requests
-beautifulsoup4
-trafilatura
-psycopg2-binary
-qdrant-client
-python-dotenv
