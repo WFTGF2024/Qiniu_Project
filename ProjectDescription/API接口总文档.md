@@ -1,4 +1,4 @@
-此处介绍API的各个部署端口
+# 介绍API的各个部署端口
 ## 服务部署端口
 - **Embedding**:7202
 - **ASR**:7205
@@ -15,11 +15,14 @@
 - **mySQL**:3306
 
 ## 文件服务器
-这个部分可有可无，我把它独立了出来。如果公网服务器本身可以支持通过URL让别人下载文件，这一个可以省略。
+  - 这个部分可有可无，我把它独立了出来。如果公网服务器本身可以支持通过URL让别人下载文件，这一个可以省略。
 
-由于部署AI后端的GPU服务器费用较高，按量付费。文件这部分也较为独立，把文件服务器放在CPU服务器上节省开销。
+  - 由于部署AI后端的GPU服务器费用较高，按量付费。文件这部分也较为独立，把文件服务器放在CPU服务器上节省开销。
 
-这部分也可以使用云服务提供商提供的对象存储服务，比如七牛云，阿里云OSS等实现。
+  - 这部分也可以使用云服务提供商提供的对象存储服务，比如七牛云，阿里云OSS等实现。
+
+---
+
 ### 1. 上传文件 `test.wav`
 
 ```cmd
@@ -34,7 +37,6 @@ curl -X POST http://127.0.0.1:7201/upload/2 -F "file=@test.wav"
 }
 ```
 
----
 
 ### 2. 查看用户 2 的所有文件
 
@@ -78,12 +80,14 @@ curl -X DELETE http://127.0.0.1:7201/files/1
 curl -X POST http://127.0.0.1:7201/upload/2 -F "file=@test.wav" -F "file=@readme.txt"
 ```
 
+---
+
 下面给你一套**Windows CMD 环境**可直接粘贴运行的 `curl` 测试脚本示例（默认后端监听 `http://localhost:7210`）。
 先手动把登录返回的 `token` 复制到 `%TOKEN%` 环境变量里再测需要鉴权的接口。
 
----
 
-## 0) 预设变量（CMD）
+
+### 预设变量（CMD）
 
 ```bat
 REM ===== 基础变量 =====
@@ -257,7 +261,8 @@ curl -X GET "%BASE%/web/health"
 * Windows CMD 里 JSON 需要使用双引号，内部引号用 `\"` 转义，示例里已处理。
 * 需要鉴权的请求都加：`-H "Authorization: Bearer %TOKEN%"`。登录后把 token 贴到 `set TOKEN=...` 即可。
 * `PUT /chat/api/chat/{chat_id}` 上传文件使用 `-F "file=@绝对路径"`，CMD 不支持 `~` 展开，请写完整盘符路径。
-# <font color="red">1.用户CRUD</font>
+
+#  1.用户CRUD
 ## 1.1 用户注册 (Register)
 **Endpoint**: `POST /api/auth/register`
 **输入**:
@@ -412,7 +417,7 @@ curl -X GET "%BASE%/web/health"
 
 
 
-# <font color="red">2.会员CRUD</font>
+#  2.会员CRUD
 ## 2.1 查询会员信息 (Get Membership Info)
 
 **Endpoint**: `GET /api/membership/:user_id`
@@ -479,8 +484,6 @@ curl -X GET "%BASE%/web/health"
 }
 ```
 
----
-
 ## 2.4 查询所有会员信息 (Get All Memberships)
 
 `GET /api/membership`
@@ -528,8 +531,6 @@ curl -X GET "%BASE%/web/health"
   "message": "会员信息已更新"
 }
 ```
-
----
 
 ## 2.6 删除会员信息 (Delete Membership)
 
@@ -589,7 +590,6 @@ curl -X GET "%BASE%/web/health"
 }
 ```
 
----
 
 ## 2.9 查询最近 N 条订单
 
@@ -616,7 +616,7 @@ curl -X GET "%BASE%/web/health"
 ]
 ```
 
-#  <font color="red">3.聊天记录CRUD</font>
+#  3.聊天记录CRUD
 
 ## 3.1 聊天记录保存 (Save Chat Record)
 
