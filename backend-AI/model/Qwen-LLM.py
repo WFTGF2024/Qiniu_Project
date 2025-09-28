@@ -40,7 +40,7 @@ def chat():
     """
     data = request.get_json(force=True) or {}
     messages = data.get("messages")
-    model = data.get("model", MODEL_ID)
+    model = data.get("model") or MODEL_ID
 
     if not messages:
         return jsonify({"error": "messages 不能为空"}), 400
