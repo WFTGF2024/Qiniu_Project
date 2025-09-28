@@ -1,0 +1,138 @@
+
+:root{
+  --m-bg: #F2F0ED;
+  --m-panel: #E4E1DD;
+  --m-accent: #8FA3A0;   /* 青灰 */
+  --m-accent-2: #C3B7A6; /* 沙褐 */
+  --m-accent-3: #B8C0D9; /* 雾蓝 */
+  --m-text: #2E2E2E;
+  --m-muted: #6B6B6B;
+  --m-danger: #B35C5C;
+  --m-success: #7AA77A;
+  --radius: 12px;
+  --shadow: 0 6px 24px rgba(0,0,0,.06);
+}
+
+*{ box-sizing: border-box; }
+html,body,#app{ height:100%; margin:0; }
+body{ background: var(--m-bg); color: var(--m-text); font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+
+button,input,select,textarea{
+  font: inherit;
+}
+
+a{ color: inherit; text-decoration: none; opacity: .9 }
+a:hover{ opacity: 1 }
+
+.app-shell{
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas: 
+    "sidebar header header"
+    "sidebar main right";
+  height: 100%;
+}
+
+.sidebar{
+  grid-area: sidebar;
+  background: var(--m-panel);
+  padding: 12px;
+  border-right: 1px solid rgba(0,0,0,.06);
+}
+
+.header{
+  grid-area: header;
+  background: linear-gradient(180deg, #F6F5F3, #EEECE9);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.main{
+  grid-area: main;
+  padding: 16px;
+  overflow: auto;
+}
+
+.right{
+  grid-area: right;
+  border-left: 1px solid rgba(0,0,0,.06);
+  background: #F7F6F4;
+  padding: 12px;
+}
+
+.card{
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.input{
+  background: white;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
+}
+
+.btn{
+  background: var(--m-accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.btn.secondary{ background: var(--m-accent-2); }
+.btn.ghost{ background: transparent; border: 1px solid rgba(0,0,0,.12); color: var(--m-text); box-shadow:none; }
+.btn.danger{ background: var(--m-danger); }
+.btn:disabled{ opacity: .6; cursor: not-allowed; }
+
+.badge{
+  background: var(--m-accent-3);
+  color: #273142;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.row{ display:flex; gap:12px; align-items:center; }
+.col{ display:flex; flex-direction:column; gap:8px; }
+
+.chat-wrap{
+  display:flex; flex-direction:column; gap:12px; height:100%;
+}
+.chat-list{
+  flex:1; overflow:auto; display:flex; flex-direction:column; gap:10px; padding-right:8px;
+}
+.chat-input{
+  display:flex; gap:8px; align-items:center; padding:8px; background:white; border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.msg{
+  display:flex; gap:10px; align-items:flex-start;
+}
+.msg .bubble{
+  max-width: 72%;
+  padding: 10px 12px; border-radius: 12px;
+  background: white; box-shadow: var(--shadow);
+}
+.msg.user .bubble{ background:#FFF; border:1px solid rgba(0,0,0,.06); }
+.msg.ai .bubble{ background:#EFF1F0; }
+.msg .role{ width:32px; height:32px; border-radius:8px; background: var(--m-accent-3); display:flex;align-items:center;justify-content:center; font-weight:700; }
+.msg .meta{ font-size: 12px; color: var(--m-muted); margin-top: 4px; }
+.deep-questions{ display:flex; gap:8px; flex-wrap:wrap; }
+.chip{ background: #E9E6E3; border-radius: 999px; padding: 6px 10px; cursor: pointer; border:1px solid rgba(0,0,0,.04); }
+.search-box{ background:white; padding:8px; border-radius:10px; display:flex;gap:8px; align-items:center; }
+.role-grid{ display:grid; grid-template-columns: 1fr; gap:8px; }
+.role-card{ background:white; border-radius:12px; padding:10px; display:flex; gap:10px; align-items:center; box-shadow: var(--shadow); cursor:pointer; }
+.role-card:hover{ transform: translateY(-2px); transition: .15s ease; }
+.faint{ color: var(--m-muted); }
+small.hint{ color: var(--m-muted); }
+hr.sep{ border: none; height:1px; background: rgba(0,0,0,.06); margin:8px 0; }
