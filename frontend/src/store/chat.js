@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import roles from '../data/roles'
-
 export const useChatStore = defineStore('chat', {
   state: ()=>({
     currentRole: roles[0],
