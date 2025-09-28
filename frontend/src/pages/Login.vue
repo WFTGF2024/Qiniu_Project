@@ -24,7 +24,9 @@ const password = ref('')
 async function submit(){
   try{
     const { token } = await login({ username: username.value, password: password.value })
-    user.setAuth(token, await me())
+    user.setAuth(token, null)     // 保存 token
+    const info = await me()       // 再调用 /me
+    user.setAuth(token, info)     // 保存用户信息
     router.push('/chat')
   }catch(e){
     alert('登录失败：' + (e.response?.data?.message || e.message))

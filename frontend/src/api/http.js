@@ -11,8 +11,8 @@ export const httpASR  = axios.create({ baseURL: ASR_BASE,  timeout: 60000 })
 export const httpTTS  = axios.create({ baseURL: TTS_BASE,  timeout: 60000 })
 
 function getToken(){ return localStorage.getItem('token') || '' }
-[httpCore, httpLLM, httpASR, httpTTS].forEach((inst)=>{
-  inst.interceptors.request.use((cfg)=>{
+;[httpCore, httpLLM, httpASR, httpTTS].forEach(inst=>{
+  inst.interceptors.request.use(cfg=>{
     const t = getToken()
     if(t) cfg.headers.Authorization = `Bearer ${t}`
     return cfg
