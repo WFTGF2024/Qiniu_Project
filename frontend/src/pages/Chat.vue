@@ -158,6 +158,7 @@ async function converse(userText) {
   }
 }
 
+
 async function exportChat(){
   const payload = { role: role.value, messages: chat.messages, ts: Date.now() }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' })
